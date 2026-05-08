@@ -1,0 +1,17 @@
+{
+  "name": "resume-tailor-ai",
+  "components": [
+    {
+      "name": "button",
+      "path": "src/components/ui/button.tsx"
+    },
+    {
+      "name": "card",
+      "path": "src/components/ui/card.tsx"
+    },
+    {
+      "name": "theme-toggle",
+      "path": "src/components/ui/theme-toggle.tsx"
+    }
+  ]
+}
