@@ -1,0 +1,6 @@
+environment: development
+model_provider: local
+local_storage_path: ./storage
+log_level: INFO
+cors_allowed_origins:
+  - "*"
