@@ -7,3 +7,7 @@ export function getHealthEndpoint() {
 export function getResumeUploadEndpoint() {
   return `${API_BASE_URL}/resume/upload`;
 }
+
+export function getResumeParseEndpoint() {
+  return `${API_BASE_URL}/resume/parse`;
+}

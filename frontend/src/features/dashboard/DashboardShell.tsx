@@ -1,11 +1,49 @@
+import { useCallback, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ResumeUpload } from "./ResumeUpload";
+import { ResumeViewer } from "./ResumeViewer";
+import { getResumeParseEndpoint } from "@/services/api";
+import type { ResumeUploadResponse, ResumeParseResponse } from "@/types/resume";
 
 export function DashboardShell() {
+  const [parsedResume, setParsedResume] = useState<ResumeParseResponse | null>(null);
+  const [isParsing, setIsParsing] = useState(false);
+  const [parseError, setParseError] = useState<string | null>(null);
+
+  const handleUploadSuccess = useCallback(async (resume: ResumeUploadResponse) => {
+    setParsedResume(null);
+    setParseError(null);
+    setIsParsing(true);
+
+    try {
+      const response = await fetch(getResumeParseEndpoint(), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: resume.id }),
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.json();
+        const message =
+          errorBody?.detail?.message || errorBody?.message || "Failed to parse resume";
+        throw new Error(message);
+      }
+
+      const data: ResumeParseResponse = await response.json();
+      setParsedResume(data);
+    } catch (error) {
+      setParseError(error instanceof Error ? error.message : "Failed to parse resume");
+    } finally {
+      setIsParsing(false);
+    }
+  }, []);
+
   return (
     <div className="space-y-8">
       {/* Hero Section */}
@@ -24,7 +62,7 @@ export function DashboardShell() {
       {/* Upload and JD Input Section */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Resume Upload */}
-        <ResumeUpload />
+        <ResumeUpload onUploadSuccess={handleUploadSuccess} />
 
         {/* JD Input */}
         <Card title="Job Description" description="Paste the job description you want to tailor for.">
@@ -65,8 +103,10 @@ export function DashboardShell() {
           </Card>
         </div>
 
-        {/* Resume Diff Viewer */}
-        <div className="lg:col-span-2">
+        {/* Viewer and Comparison */}
+        <div className="lg:col-span-2 space-y-6">
+          <ResumeViewer parseResult={parsedResume} isLoading={isParsing} error={parseError} />
+
           <Card title="Resume Comparison" description="Original vs tailored version">
             <div className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">

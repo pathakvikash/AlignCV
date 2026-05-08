@@ -2,11 +2,17 @@ import uuid
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, Body, File, HTTPException, UploadFile
 
 from app.core.config import settings
 from app.core.logging import logger
-from app.schemas.resume import ResumeUploadError, ResumeUploadResponse
+from app.parser.parser import parse_resume_file
+from app.schemas.resume import (
+    ResumeParseRequest,
+    ResumeParseResponse,
+    ResumeUploadError,
+    ResumeUploadResponse,
+)
 
 router = APIRouter()
 
@@ -73,3 +79,34 @@ async def upload_resume(file: Annotated[UploadFile, File()]) -> ResumeUploadResp
         status="uploaded",
         message="Resume uploaded successfully"
     )
+
+
+@router.post("/parse", response_model=ResumeParseResponse, tags=["resume"])
+def parse_resume(request: ResumeParseRequest = Body(...)) -> ResumeParseResponse:
+    """
+    Parse a previously uploaded resume PDF into structured sections.
+    """
+    resume_path = Path(settings.local_storage_path) / "resumes" / f"{request.id}.pdf"
+    if not resume_path.exists():
+        logger.warning("resume_not_found", id=request.id, path=str(resume_path))
+        raise HTTPException(
+            status_code=404,
+            detail=ResumeUploadError(
+                error="resume_not_found",
+                message="Resume not found"
+            ).model_dump()
+        )
+
+    try:
+        parsed_resume = parse_resume_file(resume_path)
+        logger.info("resume_parsed", id=request.id, filename=parsed_resume.filename)
+        return parsed_resume
+    except Exception as e:
+        logger.error("resume_parse_failed", id=request.id, error=str(e))
+        raise HTTPException(
+            status_code=500,
+            detail=ResumeUploadError(
+                error="parse_failed",
+                message="Failed to parse resume"
+            ).model_dump()
+        )

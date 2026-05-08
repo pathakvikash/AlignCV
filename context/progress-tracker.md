@@ -9,7 +9,7 @@ change.
 
 ## Current Goal
 
-- Establish Unit 3 resume upload and file handling for AlignCV.
+- Complete Units 4 and 5 with resume parsing, structured viewer UI, and backend parse support.
 
 ## Completed
 
@@ -30,6 +30,10 @@ change.
 - Created functional frontend upload component with drag-and-drop and file picker support.
 - Added upload status handling with success/error feedback.
 - Integrated upload API with frontend UI for complete resume upload workflow.
+- Added resume parser engine with PDF extraction, normalized text, and structured section detection.
+- Added backend resume parse API for uploaded resume files.
+- Added frontend resume viewer UI showing parsed sections, extracted text, and parser status.
+- Added parser unit tests and backend requirements for PDF parsing and multipart file uploads.
 
 ## In Progress
 
@@ -37,7 +41,7 @@ change.
 
 ## Next Up
 
-- Start Unit 4 with resume parser engine.
+- Start Unit 6 with job description analysis and semantic matching.
 
 ## Open Questions
 
