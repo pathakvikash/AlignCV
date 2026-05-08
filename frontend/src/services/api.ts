@@ -3,3 +3,7 @@ export const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhos
 export function getHealthEndpoint() {
   return `${API_BASE_URL}/health`;
 }
+
+export function getResumeUploadEndpoint() {
+  return `${API_BASE_URL}/resume/upload`;
+}

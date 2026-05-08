@@ -1,9 +1,9 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { ResumeUpload } from "./ResumeUpload";
 
 export function DashboardShell() {
   return (
@@ -24,22 +24,7 @@ export function DashboardShell() {
       {/* Upload and JD Input Section */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Resume Upload */}
-        <Card title="Upload Resume" description="Drop your master resume PDF to begin tailoring.">
-          <div className="space-y-4">
-            <div className="border-2 border-dashed border-border-muted rounded-lg p-8 text-center">
-              <div className="space-y-2">
-                <div className="text-4xl">📄</div>
-                <p className="text-sm text-text-muted">
-                  Drag and drop your resume PDF here, or click to browse
-                </p>
-                <Button variant="outline" size="sm">
-                  Choose File
-                </Button>
-              </div>
-            </div>
-            <Input placeholder="Or paste resume text here..." />
-          </div>
-        </Card>
+        <ResumeUpload />
 
         {/* JD Input */}
         <Card title="Job Description" description="Paste the job description you want to tailor for.">

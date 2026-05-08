@@ -9,7 +9,7 @@ change.
 
 ## Current Goal
 
-- Establish Unit 1 repository and application foundation for AlignCV.
+- Establish Unit 3 resume upload and file handling for AlignCV.
 
 ## Completed
 
@@ -26,6 +26,10 @@ change.
 - Added dark/light theme support with proper semantic tokens.
 - Built reusable UI components: Button, Input, Textarea, Badge, Card, Separator.
 - Updated Tailwind config with full design token system including colors, typography, spacing, border radius, and shadows.
+- Implemented PDF upload API with file validation, size limits, and local filesystem storage.
+- Created functional frontend upload component with drag-and-drop and file picker support.
+- Added upload status handling with success/error feedback.
+- Integrated upload API with frontend UI for complete resume upload workflow.
 
 ## In Progress
 
@@ -33,7 +37,7 @@ change.
 
 ## Next Up
 
-- Start Unit 3 with resume upload and file handling.
+- Start Unit 4 with resume parser engine.
 
 ## Open Questions
 
