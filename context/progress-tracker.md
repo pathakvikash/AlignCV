@@ -21,6 +21,11 @@ change.
 - Configured backend tooling with `ruff`, `black`, and `pytest`.
 - Configured frontend tooling with `ESLint`, `Prettier`, TypeScript strict mode, and Tailwind.
 - Verified backend health test and frontend build/lint.
+- Implemented complete design system with semantic color tokens, typography system, spacing system, and reusable UI primitives.
+- Created professional dashboard UI with app shell, navbar/header, upload layout, and split-panel layout.
+- Added dark/light theme support with proper semantic tokens.
+- Built reusable UI components: Button, Input, Textarea, Badge, Card, Separator.
+- Updated Tailwind config with full design token system including colors, typography, spacing, border radius, and shadows.
 
 ## In Progress
 
@@ -28,7 +33,7 @@ change.
 
 ## Next Up
 
-- Start Unit 2 with resume parsing and JD analysis scaffolding.
+- Start Unit 3 with resume upload and file handling.
 
 ## Open Questions
 
@@ -39,7 +44,12 @@ change.
 - Kept the monorepo as a modular monolith with explicit frontend/backend boundaries.
 - Chose environment configuration via YAML and `.env` to support local-first development and runtime overrides.
 - Used Vite and Tailwind for a lightweight UI foundation aligned with the design system.
+- Implemented semantic design tokens for maintainable theming and consistent UI.
+- Used Inter font for UI and JetBrains Mono for code displays.
+- Established 8px spacing system with predefined spacing tokens.
+- Created reusable UI primitives following shadcn/ui patterns.
 
 ## Session Notes
 
 - Unit 1 foundation is complete. The repository is ready for feature implementation in Unit 2.
+- Unit 2 design system is complete. Professional dashboard UI exists with dark/light themes and reusable design system established.
