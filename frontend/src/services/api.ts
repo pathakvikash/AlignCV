@@ -19,3 +19,7 @@ export function getJobDescriptionSubmitEndpoint() {
 export function getJobDescriptionEndpoint(jobId: string) {
   return `${API_BASE_URL}/jd/${jobId}`;
 }
+
+export function getMatchEndpoint() {
+  return `${API_BASE_URL}/match`;
+}

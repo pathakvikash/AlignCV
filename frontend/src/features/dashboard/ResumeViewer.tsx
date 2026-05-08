@@ -49,8 +49,8 @@ export function ResumeViewer({ parseResult, isLoading, error }: ResumeViewerProp
               <div className="rounded-lg border border-border bg-surface-elevated p-4">
                 <h4 className="text-sm font-medium text-text-primary">Section Count</h4>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {parseResult.sections.map((section) => (
-                    <Badge key={section.title} variant="info">
+                  {parseResult.sections.map((section, index) => (
+                    <Badge key={`${section.title}-${index}`} variant="info">
                       {section.title}
                     </Badge>
                   ))}
@@ -61,8 +61,8 @@ export function ResumeViewer({ parseResult, isLoading, error }: ResumeViewerProp
             <Separator />
 
             <div className="space-y-4">
-              {parseResult.sections.map((section) => (
-                <div key={section.title} className="rounded-lg border border-border bg-surface p-4">
+              {parseResult.sections.map((section, index) => (
+                <div key={`${section.title}-${index}`} className="rounded-lg border border-border bg-surface p-4">
                   <h4 className="text-sm font-semibold text-text-primary">{section.title}</h4>
                   <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-text-secondary">
                     {section.content}

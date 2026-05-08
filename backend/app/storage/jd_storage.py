@@ -5,11 +5,10 @@ from datetime import datetime, timezone
 from uuid import uuid4
 
 from app.schemas.jd import JobDescriptionAnalysis, JobDescriptionResponse
-from app.storage.database import get_connection, initialize_database
+from app.storage.database import get_connection
 
 
 def create_job_description(raw_text: str, analysis: JobDescriptionAnalysis) -> JobDescriptionResponse:
-    initialize_database()
     job_id = str(uuid4())
     created_at = datetime.now(timezone.utc).isoformat()
     analysis_json = json.dumps(analysis.model_dump())
@@ -30,20 +29,37 @@ def create_job_description(raw_text: str, analysis: JobDescriptionAnalysis) -> J
     )
 
 
-def get_job_description(job_id: str) -> JobDescriptionResponse | None:
+def get_job_description_record(job_id: str) -> tuple[str, JobDescriptionAnalysis] | None:
     with get_connection() as connection:
         row = connection.execute(
-            "SELECT id, created_at, analysis_json FROM job_descriptions WHERE id = ?",
+            "SELECT raw_text, analysis_json FROM job_descriptions WHERE id = ?",
             (job_id,),
         ).fetchone()
         if row is None:
             return None
 
         analysis = JobDescriptionAnalysis(**json.loads(row["analysis_json"]))
-        return JobDescriptionResponse(
-            id=row["id"],
-            created_at=datetime.fromisoformat(row["created_at"].replace("Z", "+00:00")),
-            status="saved",
-            message="Job description loaded successfully.",
-            analysis=analysis,
-        )
+        return row["raw_text"], analysis
+
+
+def get_job_description(job_id: str) -> JobDescriptionResponse | None:
+    record = get_job_description_record(job_id)
+    if record is None:
+        return None
+
+    _, analysis = record
+    with get_connection() as connection:
+        row = connection.execute(
+            "SELECT id, created_at FROM job_descriptions WHERE id = ?",
+            (job_id,),
+        ).fetchone()
+        if row is None:
+            return None
+
+    return JobDescriptionResponse(
+        id=row["id"],
+        created_at=datetime.fromisoformat(row["created_at"]),
+        status="saved",
+        message="Job description loaded successfully.",
+        analysis=analysis,
+    )

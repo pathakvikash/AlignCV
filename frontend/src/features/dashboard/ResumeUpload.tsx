@@ -26,10 +26,16 @@ export function ResumeUpload({ onUploadSuccess }: ResumeUploadProps) {
       const formData = new FormData();
       formData.append("file", file);
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
       const response = await fetch(getResumeUploadEndpoint(), {
         method: "POST",
         body: formData,
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorData: ResumeUploadError = await response.json();

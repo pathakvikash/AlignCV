@@ -4,3 +4,4 @@ local_storage_path: ./storage
 log_level: INFO
 cors_allowed_origins:
   - "*"
+embedding_model_name: all-MiniLM-L6-v2

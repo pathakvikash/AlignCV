@@ -9,7 +9,7 @@ change.
 
 ## Current Goal
 
-- Complete Units 6 and 7 with JD input storage, validation, and structured analysis.
+- Complete Units 8–10 with semantic embedding infrastructure, resume-to-job matching, and match analysis UI.
 
 ## Completed
 
@@ -37,6 +37,8 @@ change.
 - Added JD input persistence with SQLite storage and backend submission API.
 - Added JD analysis engine with deterministic role detection, skill/tool extraction, responsibilities, and keyword prioritization.
 - Added frontend JD save workflow and analysis panel with structured results.
+- Added backend match endpoint and frontend match analysis integration for resume + JD alignment.
+- Fixed duplicate React keys in the match analysis UI when parsed resume sections share the same normalized title.
 
 ## In Progress
 
@@ -44,7 +46,8 @@ change.
 
 ## Next Up
 
-- Start Unit 8 with semantic embedding infrastructure and matching support.
+- Validate end-to-end resume upload, JD save, and match computation flow.
+- Add backend and frontend test coverage for the match endpoint and UI display.
 
 ## Open Questions
 

@@ -61,6 +61,7 @@ class Settings(BaseSettings):
     local_storage_path: Path = Path("storage")
     log_level: str = "INFO"
     cors_allowed_origins: list[str] = ["*"]
+    embedding_model_name: str = "all-MiniLM-L6-v2"
 
     model_config = SettingsConfigDict(
         env_file=ENV_PATH,

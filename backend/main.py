@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.health import router as health_router
 from app.api.jd import router as jd_router
+from app.api.match import router as match_router
 from app.api.resume import router as resume_router
 from app.core.config import settings
 from app.core.logging import configure_logging, logger
@@ -22,6 +23,7 @@ app = FastAPI(
 app.include_router(health_router, prefix="/api")
 app.include_router(resume_router, prefix="/api/resume")
 app.include_router(jd_router, prefix="/api/jd")
+app.include_router(match_router, prefix="/api/match")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_allowed_origins,

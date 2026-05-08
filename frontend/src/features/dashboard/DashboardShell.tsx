@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,9 +7,11 @@ import { ResumeUpload } from "./ResumeUpload";
 import { ResumeViewer } from "./ResumeViewer";
 import { JobDescriptionInput } from "./JobDescriptionInput";
 import { JobDescriptionAnalysis } from "./JobDescriptionAnalysis";
-import { getJobDescriptionSubmitEndpoint, getResumeParseEndpoint } from "@/services/api";
+import { MatchAnalysis } from "./MatchAnalysis";
+import { getJobDescriptionSubmitEndpoint, getMatchEndpoint, getResumeParseEndpoint } from "@/services/api";
 import type { ResumeUploadResponse, ResumeParseResponse } from "@/types/resume";
 import type { JobDescriptionAnalysis as JobDescriptionAnalysisType, JobDescriptionSubmissionRequest, JobDescriptionResponse } from "@/types/jd";
+import type { MatchResult } from "@/types/match";
 
 export function DashboardShell() {
   const [parsedResume, setParsedResume] = useState<ResumeParseResponse | null>(null);
@@ -20,6 +22,9 @@ export function DashboardShell() {
   const [jobSaveStatus, setJobSaveStatus] = useState<string | null>(null);
   const [jobSaveType, setJobSaveType] = useState<"success" | "error" | null>(null);
   const [isSavingJob, setIsSavingJob] = useState(false);
+  const [matchResult, setMatchResult] = useState<MatchResult | null>(null);
+  const [isMatching, setIsMatching] = useState(false);
+  const [matchError, setMatchError] = useState<string | null>(null);
 
   const handleUploadSuccess = useCallback(async (resume: ResumeUploadResponse) => {
     setParsedResume(null);
@@ -27,13 +32,19 @@ export function DashboardShell() {
     setIsParsing(true);
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
       const response = await fetch(getResumeParseEndpoint(), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ id: resume.id }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorBody = await response.json();
@@ -55,16 +66,24 @@ export function DashboardShell() {
     setJobAnalysis(null);
     setJobSaveStatus(null);
     setJobSaveType(null);
+    setMatchResult(null);
+    setMatchError(null);
     setIsSavingJob(true);
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
       const response = await fetch(getJobDescriptionSubmitEndpoint(), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorBody = await response.json();
@@ -84,6 +103,48 @@ export function DashboardShell() {
       setIsSavingJob(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (!parsedResume?.id || !jobId) {
+      return;
+    }
+
+    const fetchMatch = async () => {
+      setIsMatching(true);
+      setMatchError(null);
+
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+        const response = await fetch(getMatchEndpoint(), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ resume_id: parsedResume.id, job_id: jobId }),
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          const errorBody = await response.json();
+          const message = errorBody?.detail?.message || errorBody?.message || "Failed to compute match";
+          throw new Error(message);
+        }
+
+        const data: MatchResult = await response.json();
+        setMatchResult(data);
+      } catch (error) {
+        setMatchError(error instanceof Error ? error.message : "Failed to compute match");
+      } finally {
+        setIsMatching(false);
+      }
+    };
+
+    void fetchMatch();
+  }, [parsedResume?.id, jobId]);
 
   return (
     <div className="space-y-8">
@@ -121,11 +182,15 @@ export function DashboardShell() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-text-secondary">Keyword Match</span>
-                <Badge variant="success">85%</Badge>
+                <Badge variant={matchResult ? "success" : "default"}>
+                  {matchResult ? `${matchResult.keyword_score.toFixed(0)}%` : "—"}
+                </Badge>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-text-secondary">ATS Safety</span>
-                <Badge variant="success">Safe</Badge>
+                <Badge variant={matchResult ? (matchResult.overall_score >= 70 ? "success" : "warning") : "default"}>
+                  {matchResult ? (matchResult.overall_score >= 70 ? "Safe" : "Review") : "Pending"}
+                </Badge>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-text-secondary">Readability</span>
@@ -136,9 +201,17 @@ export function DashboardShell() {
 
           <Card title="Missing Skills" description="Skills to highlight">
             <div className="space-y-2">
-              <Badge variant="warning">React</Badge>
-              <Badge variant="warning">TypeScript</Badge>
-              <Badge variant="info">AWS</Badge>
+              {matchResult?.missing_skills.length ? (
+                matchResult.missing_skills.map((skill) => (
+                  <Badge key={skill} variant="destructive">
+                    {skill}
+                  </Badge>
+                ))
+              ) : (
+                <p className="text-sm text-text-secondary">
+                  Upload a resume and save a JD to identify missing skills.
+                </p>
+              )}
             </div>
           </Card>
         </div>
@@ -147,6 +220,8 @@ export function DashboardShell() {
           <ResumeViewer parseResult={parsedResume} isLoading={isParsing} error={parseError} />
 
           <JobDescriptionAnalysis analysis={jobAnalysis} jobId={jobId} />
+
+          <MatchAnalysis matchResult={matchResult} isMatching={isMatching} error={matchError} />
 
           <Card title="Resume Comparison" description="Original vs tailored version">
             <div className="space-y-4">
