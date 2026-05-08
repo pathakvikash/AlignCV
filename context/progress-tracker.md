@@ -9,7 +9,7 @@ change.
 
 ## Current Goal
 
-- Complete Units 4 and 5 with resume parsing, structured viewer UI, and backend parse support.
+- Complete Units 6 and 7 with JD input storage, validation, and structured analysis.
 
 ## Completed
 
@@ -33,7 +33,10 @@ change.
 - Added resume parser engine with PDF extraction, normalized text, and structured section detection.
 - Added backend resume parse API for uploaded resume files.
 - Added frontend resume viewer UI showing parsed sections, extracted text, and parser status.
-- Added parser unit tests and backend requirements for PDF parsing and multipart file uploads.
+- Added resume parser unit tests and backend requirements for PDF parsing and multipart file uploads.
+- Added JD input persistence with SQLite storage and backend submission API.
+- Added JD analysis engine with deterministic role detection, skill/tool extraction, responsibilities, and keyword prioritization.
+- Added frontend JD save workflow and analysis panel with structured results.
 
 ## In Progress
 
@@ -41,7 +44,7 @@ change.
 
 ## Next Up
 
-- Start Unit 6 with job description analysis and semantic matching.
+- Start Unit 8 with semantic embedding infrastructure and matching support.
 
 ## Open Questions
 

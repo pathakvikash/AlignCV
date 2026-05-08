@@ -11,3 +11,11 @@ export function getResumeUploadEndpoint() {
 export function getResumeParseEndpoint() {
   return `${API_BASE_URL}/resume/parse`;
 }
+
+export function getJobDescriptionSubmitEndpoint() {
+  return `${API_BASE_URL}/jd`;
+}
+
+export function getJobDescriptionEndpoint(jobId: string) {
+  return `${API_BASE_URL}/jd/${jobId}`;
+}

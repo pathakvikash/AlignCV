@@ -1,18 +1,25 @@
 import { useCallback, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ResumeUpload } from "./ResumeUpload";
 import { ResumeViewer } from "./ResumeViewer";
-import { getResumeParseEndpoint } from "@/services/api";
+import { JobDescriptionInput } from "./JobDescriptionInput";
+import { JobDescriptionAnalysis } from "./JobDescriptionAnalysis";
+import { getJobDescriptionSubmitEndpoint, getResumeParseEndpoint } from "@/services/api";
 import type { ResumeUploadResponse, ResumeParseResponse } from "@/types/resume";
+import type { JobDescriptionAnalysis as JobDescriptionAnalysisType, JobDescriptionSubmissionRequest, JobDescriptionResponse } from "@/types/jd";
 
 export function DashboardShell() {
   const [parsedResume, setParsedResume] = useState<ResumeParseResponse | null>(null);
   const [isParsing, setIsParsing] = useState(false);
   const [parseError, setParseError] = useState<string | null>(null);
+  const [jobAnalysis, setJobAnalysis] = useState<JobDescriptionAnalysisType | null>(null);
+  const [jobId, setJobId] = useState<string | null>(null);
+  const [jobSaveStatus, setJobSaveStatus] = useState<string | null>(null);
+  const [jobSaveType, setJobSaveType] = useState<"success" | "error" | null>(null);
+  const [isSavingJob, setIsSavingJob] = useState(false);
 
   const handleUploadSuccess = useCallback(async (resume: ResumeUploadResponse) => {
     setParsedResume(null);
@@ -44,6 +51,40 @@ export function DashboardShell() {
     }
   }, []);
 
+  const handleSaveJobDescription = useCallback(async (payload: JobDescriptionSubmissionRequest) => {
+    setJobAnalysis(null);
+    setJobSaveStatus(null);
+    setJobSaveType(null);
+    setIsSavingJob(true);
+
+    try {
+      const response = await fetch(getJobDescriptionSubmitEndpoint(), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.json();
+        const message = errorBody?.detail?.message || errorBody?.message || "Failed to save job description";
+        throw new Error(message);
+      }
+
+      const data: JobDescriptionResponse = await response.json();
+      setJobAnalysis(data.analysis);
+      setJobId(data.id);
+      setJobSaveStatus(data.message);
+      setJobSaveType("success");
+    } catch (error) {
+      setJobSaveStatus(error instanceof Error ? error.message : "Failed to save job description");
+      setJobSaveType("error");
+    } finally {
+      setIsSavingJob(false);
+    }
+  }, []);
+
   return (
     <div className="space-y-8">
       {/* Hero Section */}
@@ -61,21 +102,20 @@ export function DashboardShell() {
 
       {/* Upload and JD Input Section */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Resume Upload */}
         <ResumeUpload onUploadSuccess={handleUploadSuccess} />
 
-        {/* JD Input */}
         <Card title="Job Description" description="Paste the job description you want to tailor for.">
-          <Textarea
-            placeholder="Paste the full job description here..."
-            className="min-h-[200px]"
+          <JobDescriptionInput
+            onSubmit={handleSaveJobDescription}
+            isSubmitting={isSavingJob}
+            statusMessage={jobSaveStatus}
+            statusType={jobSaveType}
           />
         </Card>
       </div>
 
       {/* Analysis and Results Section */}
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* ATS Analysis Sidebar */}
         <div className="space-y-6">
           <Card title="ATS Analysis" description="Resume optimization insights">
             <div className="space-y-3">
@@ -103,9 +143,10 @@ export function DashboardShell() {
           </Card>
         </div>
 
-        {/* Viewer and Comparison */}
         <div className="lg:col-span-2 space-y-6">
           <ResumeViewer parseResult={parsedResume} isLoading={isParsing} error={parseError} />
+
+          <JobDescriptionAnalysis analysis={jobAnalysis} jobId={jobId} />
 
           <Card title="Resume Comparison" description="Original vs tailored version">
             <div className="space-y-4">

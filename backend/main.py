@@ -2,9 +2,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.health import router as health_router
+from app.api.jd import router as jd_router
 from app.api.resume import router as resume_router
 from app.core.config import settings
 from app.core.logging import configure_logging, logger
+from app.storage.database import initialize_database
 
 configure_logging()
 
@@ -19,6 +21,7 @@ app = FastAPI(
 )
 app.include_router(health_router, prefix="/api")
 app.include_router(resume_router, prefix="/api/resume")
+app.include_router(jd_router, prefix="/api/jd")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_allowed_origins,
@@ -30,4 +33,5 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def on_startup() -> None:
+    initialize_database()
     logger.info("startup_complete", status="ok")
